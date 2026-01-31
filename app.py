@@ -48,5 +48,19 @@ def upload():
 
     return jsonify({ "code": 0, "path": filepath })
 
+@app.post("/api/remove")
+def remove():
+    data = request.get_json()
+    item = data.get("item")
+    if item is None: return jsonify({ "code": 1 })
+
+    filepath = f"{ITEMS}{secure_filename(item)}"
+    if not os.path.exists(filepath): return jsonify({ "code": 2 })
+
+    os.remove(filepath)
+    model.update()
+
+    return jsonify({ "code": 0 })
+
 if __name__ == "__main__":
     app.run(port=3001)
