@@ -1,11 +1,12 @@
 from searcher import EmbeddedSearcher, load_image_paths
 
 from flask import Flask, request, jsonify, url_for
+from werkzeug.utils import secure_filename
 from markupsafe import escape
 import os
 
-SAMPLES_PATH = "static/items/"
-model = EmbeddedSearcher(SAMPLES_PATH)
+ITEMS = "static/items/"
+model = EmbeddedSearcher(ITEMS)
 
 app = Flask(__name__, static_folder='static')
 
@@ -19,14 +20,31 @@ def search():
 
     items = model.query(query, start, count)
     formatted = [{ "path": path, "confidence": confidence } for path, confidence in items]
-    return jsonify({ "items": formatted })
+    return jsonify({ "code": 0, "items": formatted })
 
 
 @app.get("/api/list")
 def list():
-    files = load_image_paths(SAMPLES_PATH)
+    files = load_image_paths(ITEMS)
     urls = [path.replace(os.sep, "/") for path in files]
-    return jsonify({ "items": urls })
+    return jsonify({ "code": 0, "items": urls })
+
+
+ALLOWED_EXTENSIONS = {'png', 'jpg'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.post("/api/upload")
+def upload():
+    file = request.files["item"]
+    if file is None: return jsonify({ "code": 1 })
+    if not allowed_file(file.filename): return jsonify({ "code": 2 })
+
+    filepath = f"{ITEMS}{secure_filename(file.filename)}"
+    if os.path.exists(filepath): return jsonify({ "code": 3 })
+    file.save(filepath)
+    
+    return jsonify({ "code": 0, "path": filepath })
 
 if __name__ == "__main__":
     app.run(port=3001)
