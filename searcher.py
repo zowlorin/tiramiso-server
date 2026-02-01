@@ -8,12 +8,19 @@ import numpy as np
 def load_image_paths(path):
     return glob.glob(os.path.join(path, '*.[jJ][pP][gG]')) + glob.glob(os.path.join(path, '*.[pP][nN][gG]')) + glob.glob(os.path.join(path, '*.[jJ][pP][eE][gG]'))
 
+ENGINEERED_TEMPLATES = [
+    "a photo of a {}",
+    "a picture of a {}",
+    "a close-up photo of a {}",
+    "a high quality photo of a {}",
+]
+
 class EmbeddedSearcher():
     def __init__(self, path):
         self.path = path
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model, self.preprocess = clip.load("ViT-B/16", device=self.device)
+        self.model, self.preprocess = clip.load("ViT-L/14", device=self.device)
 
         self.paths = load_image_paths(self.path)
         if (not self.paths):
@@ -54,11 +61,15 @@ class EmbeddedSearcher():
 
     def query(self, text, start=0, count=1):
         try:
-            text_tokens = clip.tokenize([text]).to(self.device)
+            texts = [t.format(text) for t in ENGINEERED_TEMPLATES]
+            text_tokens = clip.tokenize(texts).to(self.device)
         
             with torch.no_grad():
                 text_features = self.model.encode_text(text_tokens)
-                text_features /= text_features.norm(dim=-1, keepdim=True)
+                text_features = F.normalize(text_features, dim=-1)
+
+                text_features = text_features.mean(dim=0, keepdim=True)
+                text_features = F.normalize(text_features, dim=-1)
 
                 logit_scale = self.model.logit_scale.exp()
                 logits_per_text = logit_scale * text_features @ self.image_features.t()
