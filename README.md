@@ -3,6 +3,7 @@ TIRAMISO (Transformer-based Item Recognition for Actively Missing Objects) is Ca
 for the 2026 STEM Week AI Hackathon.
 
 # How to Use
+0. Install dependencies (i.e. `pip install -r requirements.txt`)
 1. Create a `secret` file which will be used to create Flask sessions
 2. Create a `credentials.json` file with the following structure:
 ```json
