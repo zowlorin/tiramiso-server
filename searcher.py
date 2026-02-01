@@ -1,3 +1,4 @@
+
 from PIL import Image
 import torch
 import torch.nn.functional as F
@@ -58,6 +59,18 @@ class EmbeddedSearcher():
                 feat /= feat.norm(dim=-1,keepdim=True)
 
             self.image_features = torch.cat([self.image_features, feat], dim=0)
+
+    def add(self, path):
+        if not os.path.exists(path): return None
+        image = self.preprocess(Image.open(path).convert("RGB")).unsqueeze(0).to(self.device)
+
+        with torch.no_grad():
+            feat = self.model.encode_image(image)
+            feat /= feat.norm(dim=-1,keepdim=True)
+
+        self.image_features = torch.cat([self.image_features, feat], dim=0)
+        self.paths.append(path)
+        return len(self.paths)-1
 
     def query(self, text, start=0, count=1):
         try:
