@@ -13,18 +13,21 @@ model = EmbeddedSearcher(ITEMS)
 
 app = Flask(__name__, static_folder='static')
 
-with open('origin') as f: origin = f.read()
-CORS(
-    app,
-    resources={
-        r"/api/*": {
-            "origins": origin
-        },
-        r"/static/*": {
-            "origins": origin
-        }
-    }
-)
+if os.path.exists("origin"):
+    with open("origin") as f: origin = f.read()
+    
+    if origin:
+        CORS(
+            app,
+            resources={
+                r"/api/*": {
+                    "origins": origin
+                },
+                r"/static/*": {
+                    "origins": origin
+                }
+            }
+        )
 
 with open('secret') as f: app.secret_key = f.read()
 with open('credentials.json') as f: credentials = json.load(f)["credentials"]
