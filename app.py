@@ -102,7 +102,7 @@ def login():
     if username in credentials and check_password_hash(credentials[username], password):
         session["user"] = username
         return jsonify({ "code": 0 })
-    else: return jsonify({ "code": 1 })
+    else: return jsonify({ "code": 2 })
 
 @app.post("/api/logout")
 def logout():
