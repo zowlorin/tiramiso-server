@@ -25,7 +25,8 @@ if os.path.exists("origin"):
                 r"/static/*": {
                     "origins": origin
                 }
-            }
+            },
+            supports_credentials=True
         )
 
 with open('secret') as f: app.secret_key = f.read()
@@ -95,6 +96,14 @@ def login():
     username = data.get("username")
     password = data.get("password")
 
+    response.set_cookie(
+        "session",
+        value,
+        domain=origin,
+        samesite="None",
+        secure=True,
+        httponly=True
+    )
     
     if username in credentials and check_password_hash(credentials[username], password):
         session["user"] = username
