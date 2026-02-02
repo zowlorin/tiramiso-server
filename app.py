@@ -29,6 +29,9 @@ if os.path.exists("origin"):
             supports_credentials=True
         )
 
+        app.config['SESSION_COOKIE_DOMAIN'] = ".".join(origin.split('.')[-2:])
+        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 with open('secret') as f: app.secret_key = f.read()
 with open('credentials.json') as f: credentials = json.load(f)["credentials"]
 
@@ -95,15 +98,6 @@ def login():
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
-
-    response.set_cookie(
-        "session",
-        value,
-        domain=origin,
-        samesite="None",
-        secure=True,
-        httponly=True
-    )
     
     if username in credentials and check_password_hash(credentials[username], password):
         session["user"] = username
