@@ -14,8 +14,7 @@ model = EmbeddedSearcher(ITEMS)
 app = Flask(__name__, static_folder='static')
 
 if os.path.exists("origin"):
-    with open("origin") as f: origin = f.read()
-    
+    with open("origin") as f: origin = f.read().strip()
     if origin:
         CORS(
             app,
