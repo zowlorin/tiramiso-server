@@ -6,6 +6,7 @@ for the 2026 STEM Week AI Hackathon. It comprises of two parts, [the client](htt
 0. Install dependencies (i.e. `pip install -r requirements.txt`)
 1. Create a `secret` file which will be used to create Flask sessions
 2. Create a `credentials.json` file with the following structure:
+3. (OPTIONAL) Create a `origin` file which will be used to allow CORS for that origin
 ```json
 {
     "credentials": {
